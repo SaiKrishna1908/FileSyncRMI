@@ -1,0 +1,14 @@
+server:
+  directory: serv
+  port: 8000
+  path: /fileOp
+  addr: localhost
+
+client:
+  directory: client
+  watchTimeOut: 10 # time in seconds
+
+computeServer:
+  path: /compute
+  addr: localhost
+  port: 9001
