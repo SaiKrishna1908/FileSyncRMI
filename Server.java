@@ -29,7 +29,7 @@ public class Server {
             String fileServerDir = Util.getServerDir(data);
             Integer port = Util.getServerPort(data);
             createDirIfNotExists(fileServerDir);
-            spawnServerThreads(port, fileServerDir, Util.getComputeServerPort(data), Util.getComputeServerPath(data));
+            spawnServerThreads(Util.getServerAddr(data),port, fileServerDir, Util.getComputeServerPort(data), Util.getComputeServerPath(data));
         } catch (IOException ioException) {
             System.out.println("Could not read config file");
         }
@@ -50,14 +50,14 @@ public class Server {
         }
     }
 
-    private static void spawnServerThreads(int fsPort, String serverDirName, int computePort, String computeServerPath) {
+    private static void spawnServerThreads(String serverAddr,int fsPort, String serverDirName, int computePort, String computeServerPath) {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         executorService.submit(() -> {
             try {
                 FileServer fileServer = new FileServerImpl(serverDirName);
                 LocateRegistry.createRegistry(fsPort);
-                String serverPath = "rmi://localhost:" + fsPort+"/fileOp";
+                String serverPath = "rmi://"+serverAddr+":" + fsPort+"/fileOp";
                 System.out.println("Running file server at " +  serverPath);
                 Naming.rebind(serverPath, fileServer);
             } catch (RemoteException e) {
@@ -72,7 +72,7 @@ public class Server {
             try {
                 ComputeServer computeServer = new ComputeServerImpl();
                 LocateRegistry.createRegistry(computePort);
-                String serverPath = "rmi://localhost:" + computePort+"/compute";
+                String serverPath = "rmi://" + serverAddr + ":" + computePort+"/compute";
                 System.out.println("Running compute server at " +  serverPath);
                 Naming.rebind(serverPath, computeServer);
             } catch (RemoteException e) {
