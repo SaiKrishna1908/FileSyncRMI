@@ -23,6 +23,7 @@ public class FileServerImpl extends UnicastRemoteObject implements FileServer {
             fos.write(file);
             System.out.println("Created new file with name" + fileName);
         } catch (IOException ioException) {
+            ioException.printStackTrace();
             System.out.println("Error uploading file with name "+ fileName);
         }
     }

@@ -54,3 +54,12 @@ java -cp ".;snakeyaml.jar" Client
 java -cp ".;snakeyaml.jar" Client computeServer
 ```
 
+# How to test the program
+
+
+```Client.java``` watches the ```client/``` folder for changes. It triggers when we create a file, modify a file or delete a file and send a rmi request to server to take necessary actions.
+
+```Server.java``` watches the ```serv/``` folder and creates/modifies files when it gets a request from client.
+
+
+<p>Client and Server config is managed by config.yaml</p>

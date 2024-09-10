@@ -1,3 +1,5 @@
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,8 +41,8 @@ public class Util {
         return ((HashMap<String, String>) data.get("computeServer")).get("addr");
     }
 
-    public static String extractFileNameFromPath(String path) {
-        String chunks[] = path.split("/");
-        return chunks[chunks.length-1]; 
+    public static String extractFileNameFromPath(String filePath) {
+        Path path = Paths.get(filePath);
+        return path.getFileName().toString(); 
     }
 }
