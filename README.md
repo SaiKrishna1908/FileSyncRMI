@@ -1,3 +1,11 @@
+```
+System Config
+
+javac: 17.0.8
+java: 17.0.8 LTS
+```
+
+
 # How to compile and run server/client programs
 
 ## Compile server program
@@ -63,3 +71,9 @@ java -cp ".;snakeyaml.jar" Client computeServer
 
 
 <p>Client and Server config is managed by config.yaml</p>
+
+```
+Frequently Caused Problems
+
+We observed that in windows operating system even when the Server and Client is terminated, the port may not be released. This can cause the Server/Client program to fail to start. In this case, please change the server port and client in config.yaml
+```

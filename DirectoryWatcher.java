@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Utility class which performs periodic scan on a directory for file changes
+ */
 public class DirectoryWatcher {
 
     private final String directoryPath;
@@ -15,25 +18,20 @@ public class DirectoryWatcher {
     }
 
     public List<WatchEvent<?>> watch() {
-        // Directory to watch
         Path path = Paths.get(directoryPath);
 
         try (WatchService watchService = FileSystems.getDefault().newWatchService()) {
-            // Register the directory with the watch service for creation, deletion, and
-            // modification events
             path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
                     StandardWatchEventKinds.ENTRY_DELETE,
                     StandardWatchEventKinds.ENTRY_MODIFY);
 
             System.out.println("Watching directory: " + path);
 
-            // Wait for key to be signaled (polling every 5 seconds)
             WatchKey key = watchService.poll(timeOut, TimeUnit.SECONDS);
 
             if (key != null) {
                 List<WatchEvent<?>> events = new ArrayList<>(key.pollEvents());
 
-                // Reset the key to receive further events
                 boolean valid = key.reset();
                 if (!valid) {
                     return null;

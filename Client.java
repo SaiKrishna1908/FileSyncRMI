@@ -18,10 +18,25 @@ import java.util.concurrent.Executors;
 
 import org.yaml.snakeyaml.Yaml;
 
+/**
+ * The {@code Client} class is responsible for initializing either a file server or a compute server
+ * based on the input parameters. It reads configuration from a YAML file and starts threads to handle
+ * directory watching for the file server or computation tasks for the compute server using RMI (Remote Method Invocation).
+ */
 public class Client {
 
+    /**
+     * Name of the YAML configuration file.
+     */
     private static final String CONFIG_FILE_NAME = "config.yaml";
 
+    /**
+     * The main method is the entry point of the application. It reads the configuration from
+     * {@file config.yaml} and determines whether to connect to the compute server or the file server.
+     * 
+     * @param args Command line arguments. If the first argument is {@String "computeServer"}, it connects to
+     *             the compute server. Otherwise, it connects to the file server.
+     */
     public static void main(String[] args) {
         try {
             boolean connectToComputeServer = (args.length > 0) && args[0].equals("computeServer");
@@ -43,6 +58,10 @@ public class Client {
         }
     }
 
+    /**
+     * creates a file if it does not exists
+     * @param fileServerDir file to create
+     */
     private static void createDirIfNotExists(String fileServerDir) {
         Path path = Paths.get(fileServerDir);
 
@@ -58,6 +77,14 @@ public class Client {
         }
     }
 
+    /**
+     * Responsible for sending rmi requests and also watching directory
+     * @param directoryToWatch the directory to watch changes for
+     * @param timeOut time interval to check for changes
+     * @param serverAddr remote server address. (localhost by default see {@Code config.yaml})
+     * @param fileServerPath remote server file path. (See {@Code config.yaml}) 
+     * @param serverPort port of the remote server. (See {@Code config.yaml})
+     */
     private static void spawnFileServerThread(String directoryToWatch, int timeOut, String serverAddr, String fileServerPath,
             int serverPort) {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
@@ -93,6 +120,12 @@ public class Client {
         executorService.shutdown();
     }
 
+    /**
+     * Sync's changes with remote server. Invoked when any changes in directory changes
+     * @param operation file operation to perform on the server side
+     * @param fileName fileName for the server to create
+     * @param fileServer FileServer obj. This is a rmi object
+     */
     private static void sync(String operation, String fileName, FileServer fileServer) {
         if (operation.equals("ENTRY_CREATE") || operation.equals("ENTRY_MODIFY")) {
             try{
@@ -109,12 +142,24 @@ public class Client {
         }
     }
 
+    /**
+     * Read file from file-system
+     * @param filePath file name to read
+     * @return {@link byte[]} 
+     * @throws IOException
+     */
     private static byte[] readFile(String filePath) throws IOException {
         try (FileInputStream fis = new FileInputStream(filePath)) {
             return fis.readAllBytes();
         }
     }
 
+    /**
+     * Spawns thread to perform rmi calls to compute server
+     * @param serverAddr Server address 
+     * @param serverPath Server path
+     * @param serverPort Server port
+     */
     private static void spawnComputeServerThread(String serverAddr, String serverPath, int serverPort) {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
@@ -150,6 +195,14 @@ public class Client {
         executorService.shutdown();
     }
 
+    /**
+     * Helper method to perform
+     * @param intOption
+     * @param computeServer
+     * @param bufferedReader
+     * @throws IOException
+     * @throws InterruptedException
+     */
     private static void handleOption(Integer intOption, ComputeServer computeServer, BufferedReader bufferedReader) throws IOException, InterruptedException {
        switch (intOption) {
         case 1:

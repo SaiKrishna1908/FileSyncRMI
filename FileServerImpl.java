@@ -8,6 +8,9 @@ import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
+/**
+ * Implementation of {@link FileServer}
+ */
 public class FileServerImpl extends UnicastRemoteObject implements FileServer {
 
     private final String serverDirName;
