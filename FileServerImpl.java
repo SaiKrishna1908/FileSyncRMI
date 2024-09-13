@@ -36,7 +36,6 @@ public class FileServerImpl extends UnicastRemoteObject implements FileServer {
         Path path = Paths.get(serverDirName + "/" +fileName);
 
         try {
-            // Delete the file
             Files.delete(path);
             System.out.println("File deleted successfully!");
         } catch (NoSuchFileException e) {
@@ -44,7 +43,6 @@ public class FileServerImpl extends UnicastRemoteObject implements FileServer {
         } catch (DirectoryNotEmptyException e) {
             System.out.println("Directory is not empty: " + path);
         } catch (IOException e) {
-            // Catch-all for other I/O errors, such as permission issues
             System.out.println("Unable to delete file: " + path);
             e.printStackTrace();
         }

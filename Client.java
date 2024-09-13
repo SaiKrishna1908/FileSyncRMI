@@ -40,18 +40,23 @@ public class Client {
     public static void main(String[] args) {
         try {
             boolean connectToComputeServer = (args.length > 0) && args[0].equals("computeServer");
+            boolean syncFileSystem = (args.length > 0) && args[0].equals("sync");
             InputStream inputStream = new FileInputStream(new File(CONFIG_FILE_NAME));
             var yaml = new Yaml();
             Map<String, Object> data = yaml.load(inputStream);
 
             if (connectToComputeServer) {
                 spawnComputeServerThread(Util.getComputeServerAddr(data), Util.getComputeServerPath(data), Util.getComputeServerPort(data));
-            } else {
+            } else if (syncFileSystem) {
                 String fileClientDir = Util.getClientDir(data);
                 createDirIfNotExists(fileClientDir);
 
                 Integer timeOut = Util.getTimeOut(data);
-                spawnFileServerThread(fileClientDir, timeOut, Util.getServerAddr(data), Util.getServerPath(data), Util.getServerPort(data));
+                spawnFileSyncServerThread(fileClientDir, timeOut, Util.getServerAddr(data), Util.getServerPath(data), Util.getServerPort(data));
+            } else {
+                String fileClientDir = Util.getClientDir(data);
+                createDirIfNotExists(fileClientDir);
+                spawnFileServerThread(fileClientDir, Util.getServerAddr(data), Util.getServerPath(data), Util.getServerPort(data));
             }
         } catch (IOException ioException) {
             System.out.println("Could not read config file");
@@ -85,7 +90,7 @@ public class Client {
      * @param fileServerPath remote server file path. (See {@Code config.yaml}) 
      * @param serverPort port of the remote server. (See {@Code config.yaml})
      */
-    private static void spawnFileServerThread(String directoryToWatch, int timeOut, String serverAddr, String fileServerPath,
+    private static void spawnFileSyncServerThread(String directoryToWatch, int timeOut, String serverAddr, String fileServerPath,
             int serverPort) {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
@@ -121,6 +126,62 @@ public class Client {
     }
 
     /**
+     * Responsible for sending rmi requests
+     * @param directoryToWatch the directory to watch changes for
+     * @param timeOut time interval to check for changes
+     * @param serverAddr remote server address. (localhost by default see {@Code config.yaml})
+     * @param fileServerPath remote server file path. (See {@Code config.yaml}) 
+     * @param serverPort port of the remote server. (See {@Code config.yaml})
+     */
+    private static void spawnFileServerThread(String clientDirectory,String serverAddr, String fileServerPath, int serverPort) {
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        executorService.submit(() -> {            
+            String path = "rmi://" + serverAddr + ":" + serverPort + fileServerPath;
+            System.out.println("Connecting to server at: " + path);
+            FileServer fileServer = null;
+            try {
+                fileServer = (FileServer) Naming.lookup(path);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("Client Directory: " + clientDirectory);
+            System.out.println("Enter file name to UPLOAD, RENAME, DELETE");
+            System.out.println("Syntax <operation> <filename>");
+            while (true) {
+                String input = bufferedReader.readLine();
+
+                if (input.split(" ").length > 2) {
+                    System.out.println("Invalid command");
+                } else {
+                    String chunks[] = input.split(" ");
+                    String filePath = Paths.get(clientDirectory + "/" + chunks[1]).toAbsolutePath().toString();
+                    switch (chunks[0]) {
+                        case "UPLOAD":
+                            sync("ENTRY_CREATE", filePath, fileServer);
+                            break;
+                        case "DELETE":
+                            sync("ENTRY_DELETE", filePath, fileServer);
+                            break;
+                        case "RENAME":
+                            sync("ENTRY_CREATE", filePath, fileServer);
+                            break;
+                        default:
+                            System.out.println("Invalid operation");
+                            break;
+                    }
+                }
+                
+
+            }
+        });
+
+        executorService.shutdown();
+    }
+
+    /**
      * Sync's changes with remote server. Invoked when any changes in directory changes
      * @param operation file operation to perform on the server side
      * @param fileName fileName for the server to create
@@ -130,12 +191,14 @@ public class Client {
         if (operation.equals("ENTRY_CREATE") || operation.equals("ENTRY_MODIFY")) {
             try{
                 fileServer.uploadFile(readFile(fileName), Util.extractFileNameFromPath(fileName));
+                System.out.println("Created/Modified File Successfully");
             } catch( IOException ioException) {
                 System.out.println("Error reading file for upload");
             }
         } else if (operation.equals("ENTRY_DELETE")) {
             try {
                 fileServer.delete(Util.extractFileNameFromPath(fileName));
+                System.out.println("Deleted File Successfully");
             } catch (RemoteException e) {
                 System.out.println("Error deleting file");
             }
