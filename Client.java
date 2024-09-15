@@ -193,6 +193,7 @@ public class Client {
                 fileServer.uploadFile(readFile(fileName), Util.extractFileNameFromPath(fileName));
                 System.out.println("Created/Modified File Successfully");
             } catch( IOException ioException) {
+                ioException.printStackTrace();
                 System.out.println("Error reading file for upload");
             }
         } else if (operation.equals("ENTRY_DELETE")) {

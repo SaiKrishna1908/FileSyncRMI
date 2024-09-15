@@ -45,6 +45,11 @@ javac -cp snakeyaml.jar DirectoryWatcher.java Client.java Util.java FileServer.j
 java -cp .:snakeyaml.jar Client
 ```
 
+#### Connect Client to File-Server Sync Mode
+```
+java -cp .:snakeyaml.jar Client sync
+```
+
 #### Connect Client to Compute-Server Mode
 ```
 java -cp .:snakeyaml.jar Client computeServer
@@ -57,6 +62,11 @@ java -cp .:snakeyaml.jar Client computeServer
 java -cp ".;snakeyaml.jar" Client
 ```
 
+#### Connect Client to File-Server Sync Mode
+```
+java -cp ".;snakeyaml.jar" Client sync
+```
+
 #### Connect Client to Compute-Server Mode
 ```
 java -cp ".;snakeyaml.jar" Client computeServer
@@ -65,7 +75,7 @@ java -cp ".;snakeyaml.jar" Client computeServer
 # How to test the program
 
 
-```Client.java``` watches the ```client/``` folder for changes. It triggers when we create a file, modify a file or delete a file and send a rmi request to server to take necessary actions.
+```Client.java``` watches the ```client/``` folder for changes. It triggers when we create a file, modify a file or delete a file and send a <b>RMI</b> request to server to take necessary actions.
 
 ```Server.java``` watches the ```serv/``` folder and creates/modifies files when it gets a request from client.
 
