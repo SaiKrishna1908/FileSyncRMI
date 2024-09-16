@@ -86,4 +86,6 @@ java -cp ".;snakeyaml.jar" Client computeServer
 Frequently Caused Problems
 
 We observed that in windows operating system even when the Server and Client is terminated, the port may not be released. This can cause the Server/Client program to fail to start. In this case, please change the server port and client in config.yaml
+
+When copying data from test-data folder if you are in windows make sure you don't open the file in text-editor or any other application is not using the file.
 ```
