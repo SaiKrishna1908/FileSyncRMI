@@ -166,7 +166,11 @@ public class Client {
                             sync("ENTRY_DELETE", filePath, fileServer);
                             break;
                         case "RENAME":
-                            sync("ENTRY_CREATE", filePath, fileServer);
+                            System.out.println("Enter new file name");
+                            String newFilePath = Paths.get(clientDirectory + "/" + bufferedReader.readLine()).toAbsolutePath().toString();
+                            Util.renameFile(filePath, newFilePath);
+                            sync("ENTRY_DELETE", filePath, fileServer);
+                            sync("ENTRY_CREATE", newFilePath, fileServer);                            
                             break;
                         default:
                             System.out.println("Invalid operation");
@@ -192,8 +196,7 @@ public class Client {
             try{
                 fileServer.uploadFile(readFile(fileName), Util.extractFileNameFromPath(fileName));
                 System.out.println("Created/Modified File Successfully");
-            } catch( IOException ioException) {
-                ioException.printStackTrace();
+            } catch( IOException ioException) {                
                 System.out.println("Error reading file for upload");
             }
         } else if (operation.equals("ENTRY_DELETE")) {

@@ -1,3 +1,4 @@
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -44,5 +45,15 @@ public class Util {
     public static String extractFileNameFromPath(String filePath) {
         Path path = Paths.get(filePath);
         return path.getFileName().toString(); 
+    }
+
+    public static void renameFile(String filePath, String newFilePath) {
+        File oldFile = new File(filePath);
+        File newFile = new File(newFilePath);
+        if (oldFile.renameTo(newFile)) {
+            System.out.println("File renamed successfully!");
+        } else {
+            System.out.println("Failed to rename the file.");
+        }
     }
 }
